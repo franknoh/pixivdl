@@ -1,0 +1,7 @@
+node_modules
+/lib
+coverage
+src/__tests__/*.test.ts
+src/__tests__/
+.idea
+src/cookies.json
