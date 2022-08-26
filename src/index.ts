@@ -1,8 +1,6 @@
-import Client from './Client';
-import Config from './Config';
-import Illustration from './Illustration';
-import * as Request from './Request';
+export * from "./pixiv-client";
+export * from "./request";
 
-const version = '1.0.0';
+export * from "./structs";
 
-export { Client, Config, Request, Illustration, version };
+export const version = "2.0.0";
