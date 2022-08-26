@@ -1,5 +1,6 @@
 node_modules
-/lib
+/dist
+/tests
 coverage
 src/__tests__/*.test.ts
 src/__tests__/
