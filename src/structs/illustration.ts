@@ -149,7 +149,7 @@ export namespace FetchIllustrationStruct {
 	}
 
 	export interface UserIllusts {
-		[key: number]: Data;
+		[key: string]: Data;
 	}
 
 	export interface IUrl {
@@ -331,7 +331,7 @@ export namespace FetchIllustrationStruct {
 	}
 
 	export interface Illust {
-		[key: number]: TData;
+		[key: string]: TData;
 	}
 
 	export interface UserInfo {
