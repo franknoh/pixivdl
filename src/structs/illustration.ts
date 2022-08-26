@@ -331,7 +331,7 @@ export namespace FetchIllustrationStruct {
 	}
 
 	export interface Illust {
-		100717259: 1007172592;
+		[key: number]: TData;
 	}
 
 	export interface UserInfo {
