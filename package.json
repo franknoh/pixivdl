@@ -2,14 +2,7 @@
 	"name": "@franknoh/pixivdl",
 	"version": "1.0.0",
 	"description": "pixiv downloader",
-	"main": "lib/index.js",
-	"types": "lib/index.d.ts",
-	"files": [
-		"lib/**/*"
-	],
-	"bin": {
-		"pixivdl": "lib/cli.js"
-	},
+	"main": "dist/index.js",
 	"scripts": {
 		"test": "npm run build && node tests/test.js",
 		"build": "tsc",
