@@ -1,13 +1,13 @@
 {
-  "compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
-    "declaration": true,
-    "outDir": "./lib",
-    "strict": true,
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "**/__tests__/*"]
+	"compilerOptions": {
+		"target": "es2017",
+		"module": "commonjs",
+		"declaration": true,
+		"outDir": "./lib",
+		"strict": true,
+		"allowSyntheticDefaultImports": true,
+		"allowJs": true
+	},
+	"include": ["src", "tests"],
+	"exclude": ["node_modules", "**/__tests__/*"]
 }
