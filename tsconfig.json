@@ -1,13 +1,13 @@
 {
 	"compilerOptions": {
-		"target": "es2017",
-		"module": "commonjs",
+		"module": "CommonJS",
+		"target": "ES2022",
+		"moduleResolution": "Node",
 		"declaration": true,
-		"outDir": "./lib",
 		"strict": true,
-		"allowSyntheticDefaultImports": true,
-		"allowJs": true
+		"esModuleInterop": true,
+		"outDir": "dist"
 	},
-	"include": ["src", "tests"],
-	"exclude": ["node_modules", "**/__tests__/*"]
+	"include": ["src/**/*"],
+	"lib": ["ES2021"]
 }
