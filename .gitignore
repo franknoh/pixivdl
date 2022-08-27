@@ -1,8 +1,6 @@
 node_modules
-/dist
-/tests
-coverage
-src/__tests__/*.test.ts
-src/__tests__/
+dist
+lib
+tests/data*
 .idea
-src/cookies.json
+.vscode

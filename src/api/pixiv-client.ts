@@ -4,7 +4,7 @@ import { CheerioAPI, load } from "cheerio";
 import * as chrome from "selenium-webdriver/chrome";
 import * as firefox from "selenium-webdriver/firefox";
 import * as edge from "selenium-webdriver/edge";
-import { FetchIllustrationStruct, IllustrationStruct } from "./structs";
+import { FetchIllustrationStruct, IllustrationStruct } from "../structs";
 
 export class PixivClient {
 	private readonly _session: Session;
@@ -16,6 +16,10 @@ export class PixivClient {
 		this._session.updateHeaders({
 			"Accept-Language": this._language
 		});
+	}
+
+	public get session(): Session {
+		return this._session;
 	}
 
 	public terminate(): void {
@@ -51,7 +55,10 @@ export class PixivClient {
 	}
 
 	public async login(id: string, password: string, browser: "chrome" | "firefox" | "edge" | "ie" | "safari" = "chrome"): Promise<boolean> {
-		if (await this.is_logged_in()) throw new Error("Already logged in");
+		if (await this.is_logged_in())
+			return new Promise(() => {
+				return true;
+			});
 
 		try {
 			this._driver = await new Builder()
