@@ -1,7 +1,7 @@
-import { Options, Pool, createPool } from "generic-pool";
-import { WorkerOptions, Worker } from "worker_threads";
-import { resolve } from "path";
-import { existsSync } from "fs";
+import {createPool, Options} from "generic-pool";
+import {Worker, WorkerOptions} from "worker_threads";
+import {resolve} from "path";
+import {existsSync} from "fs";
 
 export interface WorkerThreadsPoolOptions {
 	workerPath: string;
@@ -16,7 +16,7 @@ export const Thread = (options: WorkerThreadsPoolOptions) => {
 		throw new Error(`Worker path ${resolvedWorkerPath} does not exist.`);
 	}
 
-	const pool = createPool(
+	return createPool(
 		{
 			create: async () => {
 				return new Worker(options.workerPath, options.workerOptions);
@@ -27,6 +27,4 @@ export const Thread = (options: WorkerThreadsPoolOptions) => {
 		},
 		options.poolOptions
 	);
-
-	return pool;
 };
