@@ -1,10 +1,10 @@
-import { Session } from "./request";
-import { Builder, By, until, WebDriver } from "selenium-webdriver";
-import { CheerioAPI, load } from "cheerio";
+import {Session} from "./request";
+import {Builder, By, until, WebDriver} from "selenium-webdriver";
+import {CheerioAPI, load} from "cheerio";
 import * as chrome from "selenium-webdriver/chrome";
 import * as firefox from "selenium-webdriver/firefox";
 import * as edge from "selenium-webdriver/edge";
-import { FetchIllustrationStruct, IllustrationStruct } from "../structs";
+import {FetchIllustrationStruct, IllustrationStruct} from "../structs";
 
 export class PixivClient {
 	private readonly _session: Session;
@@ -25,7 +25,7 @@ export class PixivClient {
 	public terminate(): void {
 		if (!this._driver) throw new Error("Driver is not initialized");
 
-		this._driver!.quit();
+		this._driver!.quit().then();
 	}
 
 	private async _request_json<T = any>(
@@ -110,7 +110,7 @@ export class PixivClient {
 	}
 
 	public async search_illustrations(word: string[], page = 1): Promise<IllustrationStruct.SearchIllustResult> {
-		const response = await this._request_json<IllustrationStruct.SearchIllustResult>(
+		return await this._request_json<IllustrationStruct.SearchIllustResult>(
 			`https://www.pixiv.net/ajax/search/artworks/${encodeURIComponent(word.join(" "))}`,
 			"GET",
 			{
@@ -124,14 +124,10 @@ export class PixivClient {
 			},
 			{}
 		);
-
-		return response;
 	}
 
 	public async fetch_illustration(illustrationId: number | string): Promise<FetchIllustrationStruct.FetchIllustrationResult> {
 		const dom = await this._request_dom(`https://www.pixiv.net/en/artworks/${illustrationId}`, "GET");
-		const response = JSON.parse(dom("meta[name=preload-data]").attr("content") as string) as FetchIllustrationStruct.FetchIllustrationResult;
-
-		return response;
+		return JSON.parse(dom("meta[name=preload-data]").attr("content") as string) as FetchIllustrationStruct.FetchIllustrationResult;
 	}
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
-import { IWebDriverCookie } from "selenium-webdriver";
-import { writeFileSync, readFileSync, existsSync } from "fs";
+import {IWebDriverCookie} from "selenium-webdriver";
+import {existsSync, readFileSync, writeFileSync} from "fs";
 import * as path from "path";
 
 export class Session {
@@ -59,17 +59,16 @@ export class Session {
 		responseType?: any
 	) {
 		this.updateHeaders({ Cookie: this.getCookieString() });
-		const response = await axios({
-			url: url,
-			method: method,
-			params: params,
-			headers: {
+		return axios({
+			"url": url,
+			"method": method,
+			"params": params,
+			"headers": {
 				...headers,
 				...this.headers
 			},
-			data: data,
-			responseType: responseType
+			"data": data,
+			"responseType": responseType
 		});
-		return response;
 	}
 }
