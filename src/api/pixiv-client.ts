@@ -56,9 +56,7 @@ export class PixivClient {
 
 	public async login(id: string, password: string, browser: "chrome" | "firefox" | "edge" | "ie" | "safari" = "chrome"): Promise<boolean> {
 		if (await this.is_logged_in())
-			return new Promise(() => {
-				return true;
-			});
+			return true;
 
 		try {
 			this._driver = await new Builder()
@@ -96,6 +94,7 @@ export class PixivClient {
 			const cookies = await this._driver.manage().getCookies();
 
 			this._session.updateCookies(cookies);
+
 			return true;
 		} catch (error) {
 			return false;

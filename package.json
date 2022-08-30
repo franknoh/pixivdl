@@ -4,8 +4,8 @@
 	"description": "pixiv downloader",
 	"main": "dist/index.js",
 	"scripts": {
-		"test": "npm i && npm run build && tsc ./tests/downloader.ts",
-		"build": "tsc",
+		"test": "npm run build && ts-node ./tests/test.ts",
+		"build": "npm i && tsc && tsc ./tests/downloader.ts",
 		"format": "prettier --write \"src/**/*.ts\"",
 		"lint": "tslint -p tsconfig.json"
 	},
