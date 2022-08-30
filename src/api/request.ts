@@ -1,6 +1,6 @@
 import axios from "axios";
 import {IWebDriverCookie} from "selenium-webdriver";
-import {existsSync, readFileSync, writeFileSync} from "fs";
+import {existsSync, readFileSync, writeFileSync, mkdirSync} from "fs";
 import * as path from "path";
 
 export class Session {
@@ -12,6 +12,7 @@ export class Session {
 			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
 			Referer: "https://www.pixiv.net/"
 		};
+		this.loadCookies();
 	}
 
 	updateHeaders(headers: { [key: string]: string }) {
@@ -33,12 +34,15 @@ export class Session {
 	}
 
 	saveCookies(cookies: IWebDriverCookie[]) {
-		writeFileSync(path.join(__dirname, "cookies.json"), JSON.stringify(cookies));
+		if(!existsSync(path.join(__dirname, "../data"))) {
+			mkdirSync(path.join(__dirname, "../data"));
+		}
+		writeFileSync(path.join(__dirname, "../data/cookies.json"), JSON.stringify(cookies));
 	}
 
 	loadCookies() {
-		if (existsSync(path.join(__dirname, "cookies.json"))) {
-			this.updateCookies(JSON.parse(readFileSync(path.join(__dirname, "cookies.json"), "utf-8")));
+		if (existsSync(path.join(__dirname, "../data/cookies.json"))) {
+			this.updateCookies(JSON.parse(readFileSync(path.join(__dirname, "../data/cookies.json"), "utf-8")));
 		}
 	}
 
