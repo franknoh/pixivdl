@@ -3,6 +3,5 @@ dist
 lib
 src/data/*
 tests/downloads/*
-tests/*.js
 .idea
 .vscode

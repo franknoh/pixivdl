@@ -4,8 +4,8 @@
 	"description": "pixiv downloader",
 	"main": "dist/index.js",
 	"scripts": {
-		"test": "npm run build && ts-node ./tests/test.ts",
-		"build": "npm i && tsc && tsc ./tests/downloader.ts",
+		"test": "npm run build && node ./tests/test.js",
+		"build": "npm i && tsc",
 		"format": "prettier --write \"src/**/*.ts\"",
 		"lint": "tslint -p tsconfig.json"
 	},
@@ -14,12 +14,14 @@
 	"dependencies": {
 		"axios": "^0.27.2",
 		"cheerio": "^1.0.0-rc.12",
+		"cli-progress": "^3.11.2",
 		"generic-pool": "^3.8.2",
 		"path": "^0.12.7",
 		"selenium-webdriver": "^4.3.1"
 	},
 	"devDependencies": {
 		"@types/clear": "^0.1.2",
+		"@types/cli-progress": "^3.11.0",
 		"@types/figlet": "^1.5.4",
 		"@types/node": "^18.7.13",
 		"@types/selenium-webdriver": "^4.1.2",
