@@ -9,7 +9,10 @@ parentPort!.on("message", async(data) => {
 			`${data.path}/${data.name}`,
 			(await session.request(data.url, "GET", undefined, undefined, undefined, "arraybuffer")).data
 		);
-		parentPort!.postMessage(true);
+		parentPort!.postMessage({
+			'ok': true,
+			'id': data.id
+		});
 	} catch (e) {
 		console.log(e);
 		parentPort!.postMessage(false);

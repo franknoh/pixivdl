@@ -3,7 +3,7 @@ import {Builder, By, until, WebDriver} from "selenium-webdriver";
 import {CheerioAPI, load} from "cheerio";
 import {FetchIllustrationStruct, IllustrationStruct} from "../structs";
 import {Thread, URLUtil, hasCommon, waitFor} from "../util";
-import {existsSync, mkdirSync} from "fs";
+import {existsSync, mkdirSync, writeFileSync} from "fs";
 import * as cliProgress from "cli-progress";
 import * as path from "path";
 import * as chrome from "selenium-webdriver/chrome";
@@ -63,9 +63,12 @@ export class PixivClient {
 			return true;
 
 		try {
+			const chromeOptions = new chrome.Options();
+			chromeOptions.addArguments("--log-level=OFF");
+			chromeOptions.headless();
 			this._driver = await new Builder()
 				.forBrowser(browser)
-				.setChromeOptions(new chrome.Options().headless())
+				.setChromeOptions(chromeOptions)
 				.setEdgeOptions(new edge.Options().headless())
 				.setFirefoxOptions(new firefox.Options().headless())
 				.build();
@@ -129,9 +132,10 @@ export class PixivClient {
 		);
 	}
 
-	public async fetch_illustration(illustrationId: number | string): Promise<FetchIllustrationStruct.FetchIllustrationResult> {
-		const dom = await this._request_dom(`https://www.pixiv.net/en/artworks/${illustrationId}`, "GET");
-		return JSON.parse(dom("meta[name=preload-data]").attr("content") as string) as FetchIllustrationStruct.FetchIllustrationResult;
+	public async fetch_illustration(illustrationId: number | string): Promise<FetchIllustrationStruct.FetchIllustrationResult|null> {
+		const dom = await this._request_dom(`https://www.pixiv.net/en/artworks/${illustrationId}`, "GET").catch(() => null);
+		if(dom) return JSON.parse(dom("meta[name=preload-data]").attr("content") as string) as FetchIllustrationStruct.FetchIllustrationResult;
+		else return null;
 	}
 
 	public async download(tags: string[], num: number, dlpath: string, bookmarks: number=0, extags: string[]=[]): Promise<void> {
@@ -145,15 +149,27 @@ export class PixivClient {
 		});
 
 		const dlbar = new cliProgress.MultiBar({
-			format: '{filename} [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}',
+			format: '{filename} [{bar}] {percentage}% | ETA: {eta}s | {value}/{total} {name}',
+			hideCursor: true,
 		}, cliProgress.Presets.shades_classic);
 
-		const startbar = dlbar.create(num, 0, { filename: "Starting" });
-		const donebar = dlbar.create(num, 0, { filename: "Done    " });
+		const startbar = dlbar.create(num, 0, { filename: "Starting", name: "" });
+		const donebar = dlbar.create(num, 0, { filename: "Done    ", name: "" });
 
 		let page=1;
 		let done=0
 		let start=0;
+
+		const data: {[key:string]: any} = {
+			'num': num,
+			'tags': tags,
+			'ex_tags': extags,
+			'path': dlpath,
+			'bookmarks': bookmarks,
+			'illustrations': []
+		};
+
+		const deleted: string[] = [];
 
 		if(!existsSync(dlpath)) mkdirSync(dlpath);
 
@@ -162,23 +178,30 @@ export class PixivClient {
 			for(let i=0;i<Illusts.body.illustManga.data.length;i++) {
 				if(start>=num) break;
 				const illust = await this.fetch_illustration(Illusts.body.illustManga.data[i].id);
+				if(!illust) continue;
 				const keys = Object.keys(illust.illust);
 				let m = 0;
 				for(let j=0;j<keys.length;j++) {
 					const key=keys[j];
-					if (hasCommon(illust.illust[key].tags.tags.map((e) => e.tag), extags)) continue;
-					if (illust.illust[key].bookmarkCount < bookmarks) continue;
+					const Illust = illust.illust[key];
+					startbar.update(start, { name: Illust.id });
+					if (hasCommon(Illust.tags.tags.map((e) => e.tag), extags)) continue;
+					if (Illust.bookmarkCount < bookmarks) continue;
+					data.illustrations.push(Illust);
 
-					const url = URLUtil.getDownloadURL(illust.illust[key].urls);
+					const url = URLUtil.getDownloadURL(Illust.urls);
 					const worker = await pool.acquire();
 					start++;
 					startbar.increment();
-					const doned = async(ok: boolean)=>{
-						if(ok) {
+					const doned = async(res: { 'ok': boolean, 'id': string })=>{
+						if(res.ok) {
 							done++;
 							donebar.increment();
+							donebar.update(done, { name: res.id });
 						}else {
 							start--;
+							startbar.update(start);
+							deleted.push(res.id);
 						}
 						worker.removeListener("message", doned);
 						await pool.release(worker);
@@ -187,7 +210,8 @@ export class PixivClient {
 					worker.postMessage({
 						'url': url,
 						'path': dlpath,
-						'name': `${illust.illust[key].id}_${m}.${url.split(".").pop()}`,
+						'name': `${Illust.id}_${m}.${url.split(".").pop()}`,
+						'id': Illust.id
 					})
 					m++;
 				}
@@ -198,6 +222,12 @@ export class PixivClient {
 		await pool.drain();
 		await pool.clear();
 
-		await waitFor(() => (done >= num), ()=>{setTimeout(()=>{dlbar.stop();})});
+		await waitFor(() => (done >= num), ()=>{setTimeout(()=>{
+			dlbar.stop();
+			deleted.forEach((e) => {
+				data.illustrations = data.illustrations.filter((f: FetchIllustrationStruct.TData) => f.id !== e);
+			});
+			writeFileSync(path.join(dlpath, "data.json"), JSON.stringify(data, null, 2));
+		}, 200)});
 	}
 }
