@@ -3,15 +3,30 @@
 	"version": "1.0.0",
 	"description": "pixiv downloader",
 	"main": "dist/index.js",
-	"repository": "github:franknoh/pixivdl",
+	"types": "dist/index.d.ts",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/franknoh/pixivdl.git"
+	},
+	"bugs": {
+		"url": "https://github.com/franknoh/pixivdl/issues"
+	},
+	"homepage": "https://github.com/franknoh/pixivdl#readme",
+	"author": "franknoh",
+	"license": "ISC",
+	"keywords": [
+		"pixiv",
+		"downloader"
+	],
+	"files": [
+		"dist/**/*"
+	],
 	"scripts": {
 		"test": "npm run build && node ./tests/test.js",
 		"build": "npm i && tsc",
 		"format": "prettier --write \"src/**/*.ts\"",
 		"lint": "tslint -p tsconfig.json"
 	},
-	"author": "franknoh",
-	"license": "ISC",
 	"dependencies": {
 		"axios": "^0.27.2",
 		"cheerio": "^1.0.0-rc.12",
