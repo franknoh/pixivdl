@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"description": "pixiv downloader",
 	"main": "dist/index.js",
+	"repository": "github:franknoh/pixivdl",
 	"scripts": {
 		"test": "npm run build && node ./tests/test.js",
 		"build": "npm i && tsc",

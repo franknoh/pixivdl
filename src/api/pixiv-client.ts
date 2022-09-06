@@ -141,7 +141,7 @@ export class PixivClient {
 	public async download(tags: string[], num: number, dlpath: string, bookmarks: number=0, extags: string[]=[]): Promise<void> {
 		const pool = Thread({
 			poolOptions: {
-				max: 20,
+				max: 40,
 				min: 1,
 			},
 			workerOptions: {},
