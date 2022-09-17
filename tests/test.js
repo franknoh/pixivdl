@@ -2,7 +2,10 @@ const {PixivClient} = require("../dist");
 
 async function main() {
     const client = new PixivClient();
-    await client.download(["genshin"], 20, "./tests/genshin", 500, ["R-18"]);
+    console.log(await client.is_logged_in('franknoh'));
+    await client.login("franknoh", "pw!");
+    console.log(await client.is_logged_in('franknoh'));
+    //await client.download(["genshin"], 10, "./tests/genshin", 0);
 }
 
 main().then().catch(console.error);

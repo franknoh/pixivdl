@@ -59,60 +59,60 @@ export class PixivClient {
 	}
 
 	public async login(id: string, password: string, browser: "chrome" | "firefox" | "edge" | "ie" | "safari" = "chrome"): Promise<boolean> {
-		if (await this.is_logged_in())
+		if (await this.is_logged_in(id)) {
 			return true;
+		}else {
+			try {
+				const chromeOptions = new chrome.Options();
+				chromeOptions.addArguments("--log-level=OFF");
+				chromeOptions.headless();
+				this._driver = await new Builder()
+					.forBrowser(browser)
+					.setChromeOptions(chromeOptions)
+					.setEdgeOptions(new edge.Options().headless())
+					.setFirefoxOptions(new firefox.Options().headless())
+					.build();
 
-		try {
-			const chromeOptions = new chrome.Options();
-			chromeOptions.addArguments("--log-level=OFF");
-			chromeOptions.headless();
-			this._driver = await new Builder()
-				.forBrowser(browser)
-				.setChromeOptions(chromeOptions)
-				.setEdgeOptions(new edge.Options().headless())
-				.setFirefoxOptions(new firefox.Options().headless())
-				.build();
+				await this._driver.sleep(2000);
+				await this._driver.get("https://accounts.pixiv.net/login");
 
-			await this._driver.sleep(2000);
-			await this._driver.get("https://accounts.pixiv.net/login");
+				await this._driver.sleep(Math.random() * 1000 + 500);
+				const loginE = (await this._driver.findElements(By.xpath(".//form")))[0];
 
-			await this._driver.sleep(Math.random() * 1000 + 500);
-			const loginE = (await this._driver.findElements(By.xpath(".//form")))[0];
+				await this._driver.sleep(Math.random() * 1000 + 500);
+				const usernameE = await loginE.findElement(By.xpath('.//input[@type="text"]'));
 
-			await this._driver.sleep(Math.random() * 1000 + 500);
-			const usernameE = await loginE.findElement(By.xpath('.//input[@type="text"]'));
+				await this._driver.sleep(Math.random() * 1000 + 500);
+				await usernameE.sendKeys(id);
 
-			await this._driver.sleep(Math.random() * 1000 + 500);
-			await usernameE.sendKeys(id);
+				await this._driver.sleep(Math.random() * 1000 + 500);
+				const passwordE = await loginE.findElement(By.xpath('.//input[@type="password"]'));
 
-			await this._driver.sleep(Math.random() * 1000 + 500);
-			const passwordE = await loginE.findElement(By.xpath('.//input[@type="password"]'));
+				await this._driver.sleep(Math.random() * 1000 + 500);
+				await passwordE.sendKeys(password);
 
-			await this._driver.sleep(Math.random() * 1000 + 500);
-			await passwordE.sendKeys(password);
+				await this._driver.sleep(Math.random() * 1000 + 500);
+				const submitE = await loginE.findElement(By.xpath('.//button[@type="submit"]'));
 
-			await this._driver.sleep(Math.random() * 1000 + 500);
-			const submitE = await loginE.findElement(By.xpath('.//button[@type="submit"]'));
+				await submitE.click();
+				await this._driver.sleep(Math.random() * 1000 + 500);
+				this._driver.wait(until.elementLocated(By.id("root")), 10000);
 
-			await submitE.click();
-			await this._driver.sleep(Math.random() * 1000 + 500);
-			this._driver.wait(until.elementLocated(By.id("root")), 10000);
+				const cookies = await this._driver.manage().getCookies();
 
-			const cookies = await this._driver.manage().getCookies();
-
-			this._session.updateCookies(cookies);
-		} finally {
-			if (this._driver)
-				this.terminate();
+				this._session.updateCookies(cookies, id);
+			} finally {
+				if (this._driver)
+					this.terminate();
+			}
+			return await this.is_logged_in(id);
 		}
-		return await this.is_logged_in();
 	}
 
-	public async is_logged_in(): Promise<boolean> {
-		this._session.loadCookies();
-
-		const response = await this._request_dom("https://www.pixiv.net/", "GET", {});
-		return !response.html().includes("not-logged-in");
+	public async is_logged_in(id: string): Promise<boolean> {
+		this._session.loadCookies(id);
+		const response = await this._request_dom("https://www.pixiv.net/", "GET");
+		return response.html().indexOf("not-logged-in")===-1;
 	}
 
 	public async search_illustrations(word: string[], page = 1): Promise<IllustrationStruct.SearchIllustResult> {
