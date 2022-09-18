@@ -65,6 +65,7 @@ export class PixivClient {
 			try {
 				const chromeOptions = new chrome.Options();
 				chromeOptions.addArguments("--log-level=OFF");
+				chromeOptions.addArguments("--disable-gpu");
 				chromeOptions.headless();
 				this._driver = await new Builder()
 					.forBrowser(browser)
@@ -72,38 +73,31 @@ export class PixivClient {
 					.setEdgeOptions(new edge.Options().headless())
 					.setFirefoxOptions(new firefox.Options().headless())
 					.build();
-
-				await this._driver.sleep(2000);
 				await this._driver.get("https://accounts.pixiv.net/login");
-
-				await this._driver.sleep(Math.random() * 1000 + 500);
 				const loginE = (await this._driver.findElements(By.xpath(".//form")))[0];
-
-				await this._driver.sleep(Math.random() * 1000 + 500);
+				await this._driver.sleep(500);
 				const usernameE = await loginE.findElement(By.xpath('.//input[@type="text"]'));
-
-				await this._driver.sleep(Math.random() * 1000 + 500);
-				await usernameE.sendKeys(id);
-
-				await this._driver.sleep(Math.random() * 1000 + 500);
+				for (const c of id.split("")) {
+					await usernameE.sendKeys(c);
+					await this._driver.sleep(10);
+				}
+				await this._driver.sleep(500);
 				const passwordE = await loginE.findElement(By.xpath('.//input[@type="password"]'));
-
-				await this._driver.sleep(Math.random() * 1000 + 500);
-				await passwordE.sendKeys(password);
-
-				await this._driver.sleep(Math.random() * 1000 + 500);
+				for (const c of password.split("")) {
+					await passwordE.sendKeys(c);
+					await this._driver.sleep(10);
+				}
+				await this._driver.sleep(500);
 				const submitE = await loginE.findElement(By.xpath('.//button[@type="submit"]'));
-
 				await submitE.click();
-				await this._driver.sleep(Math.random() * 1000 + 500);
-				this._driver.wait(until.elementLocated(By.id("root")), 10000);
-
+				this._driver.wait(until.elementLocated(By.id("root")), 1000);
+				await this._driver.sleep(5000);
+				await this._driver.get("https://www.pixiv.net/");
+				this._driver.wait(until.elementLocated(By.id("root")), 1000);
 				const cookies = await this._driver.manage().getCookies();
-
 				this._session.updateCookies(cookies, id);
 			} finally {
-				if (this._driver)
-					this.terminate();
+				this.terminate();
 			}
 			return await this.is_logged_in(id);
 		}
