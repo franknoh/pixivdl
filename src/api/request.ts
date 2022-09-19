@@ -1,4 +1,6 @@
 import axios from "axios";
+import {AxiosResponse} from "axios";
+import {Agent} from "https";
 import {IWebDriverCookie} from "selenium-webdriver";
 import {existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync} from "fs";
 import * as path from "path";
@@ -6,6 +8,7 @@ import * as path from "path";
 export class Session {
 	public headers: { [key: string]: string };
 	public cookies: IWebDriverCookie[] = [];
+	private agent: Agent = new Agent({ keepAlive: true });
 
 	constructor(user?: string) {
 		this.headers = {
@@ -68,18 +71,53 @@ export class Session {
 		headers?: { [key: string]: string },
 		data?: any,
 		responseType?: any
-	) {
+	): Promise<AxiosResponse> {
 		this.updateHeaders({ Cookie: this.getCookieString() });
-		return axios({
-			"url": url,
-			"method": method,
-			"params": params,
-			"headers": {
-				...headers,
-				...this.headers
-			},
-			"data": data,
-			"responseType": responseType
-		});
+		let delay: number = 100;
+		let trys: number = 0;
+		let response: AxiosResponse;
+		let status: number = 0;
+		try {
+			response = await axios({
+				"url": url,
+				"method": method,
+				"params": params,
+				"headers": {
+					...headers,
+					...this.headers
+				},
+				"data": data,
+				"responseType": responseType,
+				"httpsAgent": this.agent
+			});
+			status = response.status;
+		} catch (e) {
+			status = 0;
+		}
+		while(status !== 200){
+			axios({
+				"url": url,
+				"method": method,
+				"params": params,
+				"headers": {
+					...headers,
+					...this.headers
+				},
+				"data": data,
+				"responseType": responseType,
+				"httpsAgent": this.agent
+			}).then((res) => {
+				status = res.status;
+				response = res;
+			}).catch((err) => {
+				status = err.response.status;
+			});
+			if(++trys > 2) break;
+			await new Promise(resolve => setTimeout(resolve, delay));
+			delay *= 2;
+		}
+		// @ts-ignore
+		return response;
 	}
+
 }
