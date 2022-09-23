@@ -133,7 +133,7 @@ export class PixivClient {
 		else return null;
 	}
 
-	public async download(tags: string[], num: number, dlpath: string, bookmarks: number=0, extags: string[]=[]): Promise<void> {
+	public async download(tags: string[], num: number, dlpath: string, bookmarks: number=0, extags: string[]=[], urlonly: boolean=false): Promise<void> {
 		const pool = Thread({
 			poolOptions: {
 				max: 60,
@@ -168,6 +168,7 @@ export class PixivClient {
 			'ex_tags': extags,
 			'path': dlpath,
 			'bookmarks': bookmarks,
+			'urlonly': urlonly,
 			'illustrations': []
 		};
 
@@ -230,7 +231,9 @@ export class PixivClient {
 							'name': `${Illust.id}_${m}.${url.split(".").pop()}`,
 							'id': Illust.id,
 							'label': Illust.tags.tags.map((e) => e.tag).join(", "),
-							'user': this.user
+							'user': this.user,
+							'urlonly': urlonly,
+							'bookmark': Illust.bookmarkCount
 						});
 						m++;
 					}catch(e){
@@ -252,6 +255,7 @@ export class PixivClient {
 				deleted.forEach((e) => {
 					data.illustrations = data.illustrations.filter((f: string) => f !== e);
 				});
+				data.num = done
 				writeFileSync(path.join(dlpath, "info.json"), JSON.stringify(data, null, 2));
 			}, 200);
 		});
